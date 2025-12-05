@@ -12,71 +12,71 @@ Dieses Dokument beschreibt ein vollständiges Plugin-Berechnungsworkflow-Beispie
 
 ```mermaid
 sequenceDiagram
-    participant Engine as NXLD Engine<br/>引擎核心 / NXLD Engine / NXLD-Engine
-    participant Entry as EntryPlugin<br/>入口插件 / Entry Plugin / Einstiegs-Plugin
-    participant PT as PointerTransferPlugin<br/>指针传递插件 / Pointer Transfer Plugin / Zeigerübertragungs-Plugin
-    participant Add as AddPlugin<br/>加法计算插件 / Add Plugin / Additions-Plugin
-    participant Logger as FileLoggerPlugin<br/>文件日志插件 / File Logger Plugin / Datei-Logger-Plugin
-    participant Config as .nxpt Config<br/>配置文件 / Configuration File / Konfigurationsdatei
-    participant File as Log File<br/>日志文件 / Log File / Protokolldatei
+    participant Engine as NXLD Engine
+    participant Entry as EntryPlugin
+    participant PT as PointerTransferPlugin
+    participant Add as AddPlugin
+    participant Logger as FileLoggerPlugin
+    participant Config as .nxpt Config
+    participant File as Log File
 
-    Note over Engine: 系统初始化 / System Initialization / Systeminitialisierung
-    Engine->>Entry: 加载插件 / Load Plugin / Plugin laden
-    Engine->>PT: 加载插件 / Load Plugin / Plugin laden
-    PT->>Config: 读取配置规则 / Read Transfer Rules / Übertragungsregeln lesen
+    Note over Engine: System Initialization
+    Engine->>Entry: Load Plugin
+    Engine->>PT: Load Plugin
+    PT->>Config: Read Transfer Rules
     
-    Note over Entry: 插件加载时自动执行 / Auto-execute on Load / Automatisch beim Laden ausführen
-    Entry->>Entry: DllMain/构造函数<br/>传递 entry_data_a = 42<br/>通过符号查找获取 CallPlugin 函数指针<br/>DllMain/Constructor<br/>Pass entry_data_a = 42<br/>Get CallPlugin function pointer via symbol lookup<br/>DllMain/Konstruktor<br/>Übergebe entry_data_a = 42<br/>Erhalte CallPlugin-Funktionszeiger über Symbolsuche
-    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &42)
+    Note over Entry: Auto-execute on Load
+    Entry->>Entry: DllMain/Constructor<br/>Pass entry_data_a = 42<br/>Get CallPlugin function pointer via symbol lookup
+    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &42)<br/>Call Plugin Interface
     
     rect rgb(200, 220, 255)
-        Note over PT,Config: 根据 TransferRule_4 处理 / Process by TransferRule_4 / Verarbeitung gemäß TransferRule_4
-        PT->>Config: 查找规则: Source=EntryPlugin,<br/>SourceInterface=EntryPoint<br/>Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint<br/>Regel finden: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
-        Config-->>PT: 返回规则: Target=AddPlugin.Add[0]<br/>Return Rule: Target=AddPlugin.Add[0]<br/>Regel zurückgeben: Target=AddPlugin.Add[0]
-        PT->>Add: 调用 Add(a=42, b=?)<br/>Call Add(a=42, b=?)<br/>Add(a=42, b=?) aufrufen
+        Note over PT,Config: Process by TransferRule_4
+        PT->>Config: Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
+        Config-->>PT: Return Rule: Target=AddPlugin.Add[0]
+        PT->>Add: Call Add(a=42, b=?)
     end
     
-    Entry->>Entry: DllMain/构造函数<br/>传递 entry_data_b = 58<br/>通过符号查找获取 CallPlugin 函数指针<br/>DllMain/Constructor<br/>Pass entry_data_b = 58<br/>Get CallPlugin function pointer via symbol lookup<br/>DllMain/Konstruktor<br/>Übergebe entry_data_b = 58<br/>Erhalte CallPlugin-Funktionszeiger über Symbolsuche
-    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &58)
+    Entry->>Entry: DllMain/Constructor<br/>Pass entry_data_b = 58<br/>Get CallPlugin function pointer via symbol lookup
+    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &58)<br/>Call Plugin Interface
     
     rect rgb(200, 220, 255)
-        Note over PT,Config: 根据 TransferRule_5 处理 / Process by TransferRule_5 / Verarbeitung gemäß TransferRule_5
-        PT->>Config: 查找规则: Source=EntryPlugin,<br/>SourceInterface=EntryPoint<br/>Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint<br/>Regel finden: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
-        Config-->>PT: 返回规则: Target=AddPlugin.Add[1]<br/>Return Rule: Target=AddPlugin.Add[1]<br/>Regel zurückgeben: Target=AddPlugin.Add[1]
-        PT->>Add: 调用 Add(a=42, b=58)<br/>Call Add(a=42, b=58)<br/>Add(a=42, b=58) aufrufen
+        Note over PT,Config: Process by TransferRule_5
+        PT->>Config: Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
+        Config-->>PT: Return Rule: Target=AddPlugin.Add[1]
+        PT->>Add: Call Add(a=42, b=58)
     end
     
     rect rgb(255, 240, 200)
-        Note over Add: 执行计算 / Execute Calculation / Berechnung durchführen
-        Add->>Add: 计算: 42 + 58 = 100<br/>Calculate: 42 + 58 = 100<br/>Berechnen: 42 + 58 = 100
-        Add->>Add: 格式化结果字符串<br/>Format result string<br/>Ergebniszeichenfolge formatieren
-        Add->>Add: GetResultString() =<br/>"AddPlugin: Calculation result: 42 + 58 = 100"
+        Note over Add: Execute Calculation
+        Add->>Add: Calculate: 42 + 58 = 100
+        Add->>Add: Format result string
+        Add->>Add: GetResultString() =<br/>"AddPlugin: Calculation result: 42 + 58 = 100"<br/>Get Result String
     end
     
     rect rgb(255, 220, 220)
-        Note over PT,Config: 主动调用规则（TransferRule_9） / Active Call Rule (TransferRule_9) / Aktive Aufrufregel (TransferRule_9)
-        PT->>Config: 查找主动调用规则: Source=AddPlugin.Add,<br/>SourceParamIndex=-1<br/>Find Active Call Rule: Source=AddPlugin.Add,<br/>SourceParamIndex=-1<br/>Aktive Aufrufregel finden: Source=AddPlugin.Add,<br/>SourceParamIndex=-1
-        Config-->>PT: 返回规则: TransferRule_9<br/>Target=FileLoggerPlugin.Write[1]<br/>Return Rule: TransferRule_9<br/>Target=FileLoggerPlugin.Write[1]<br/>Regel zurückgeben: TransferRule_9<br/>Target=FileLoggerPlugin.Write[1]
+        Note over PT,Config: Active Call Rule (TransferRule_9)
+        PT->>Config: Find Active Call Rule: Source=AddPlugin.Add,<br/>SourceParamIndex=-1
+        Config-->>PT: Return Rule: TransferRule_9<br/>Target=FileLoggerPlugin.Write[1]
         
-        Note over PT,Config: 查找导出接口名称 / Find Export Interface Name / Export-Schnittstellennamen finden
-        PT->>Config: 查找配置规则: Source=AddPlugin,<br/>SourceInterface!=Add<br/>Find Config Rule: Source=AddPlugin,<br/>SourceInterface!=Add<br/>Konfigurationsregel finden: Source=AddPlugin,<br/>SourceInterface!=Add
-        Config-->>PT: 返回规则: TransferRule_7<br/>SourceInterface=GetResultString<br/>Return Rule: TransferRule_7<br/>SourceInterface=GetResultString<br/>Regel zurückgeben: TransferRule_7<br/>SourceInterface=GetResultString
+        Note over PT,Config: Find Export Interface Name
+        PT->>Config: Find Config Rule: Source=AddPlugin,<br/>SourceInterface!=Add
+        Config-->>PT: Return Rule: TransferRule_7<br/>SourceInterface=GetResultString
         
-        Note over PT,Add: 自动获取导出接口值 / Auto-get Export Interface Value / Export-Schnittstellenwert automatisch abrufen
-        PT->>Add: 调用 GetResultString()<br/>获取计算结果字符串<br/>Call GetResultString()<br/>Get calculation result string<br/>GetResultString() aufrufen<br/>Berechnungsergebniszeichenfolge abrufen
-        Add-->>PT: 返回结果字符串<br/>Return result string<br/>Ergebniszeichenfolge zurückgeben
+        Note over PT,Add: Auto-get Export Interface Value
+        PT->>Add: Call GetResultString()<br/>Get calculation result string
+        Add-->>PT: Return result string
         
-        Note over PT,Config: 根据 TransferRule_8 设置日志级别 / Set Log Level by TransferRule_8 / Protokollierungsebene gemäß TransferRule_8 setzen
-        PT->>Config: 查找规则: Target=FileLoggerPlugin.Write[0]<br/>Find Rule: Target=FileLoggerPlugin.Write[0]<br/>Regel finden: Target=FileLoggerPlugin.Write[0]
-        Config-->>PT: 返回规则: TargetParamValue=2 (INFO)<br/>Return Rule: TargetParamValue=2 (INFO)<br/>Regel zurückgeben: TargetParamValue=2 (INFO)
+        Note over PT,Config: Set Log Level by TransferRule_8
+        PT->>Config: Find Rule: Target=FileLoggerPlugin.Write[0]
+        Config-->>PT: Return Rule: TargetParamValue=2 (INFO)
         
-        PT->>Logger: 调用 Write(level=2,<br/>format="AddPlugin: Calculation result: 42 + 58 = 100")<br/>Call Write(level=2,<br/>format="AddPlugin: Calculation result: 42 + 58 = 100")<br/>Write(level=2,<br/>format="AddPlugin: Calculation result: 42 + 58 = 100") aufrufen
+        PT->>Logger: Call Write(level=2,<br/>format="AddPlugin: Calculation result: 42 + 58 = 100")
     end
     
     rect rgb(240, 240, 255)
-        Note over Logger,File: 写入日志文件 / Write to Log File / In Protokolldatei schreiben
-        Logger->>Logger: 格式化日志消息<br/>Format log message<br/>Protokollnachricht formatieren
-        Logger->>File: 写入文件<br/>Write to File<br/>In Datei schreiben<br/>"[2024-XX-XX XX:XX:XX] [INFO] AddPlugin: Calculation result: 42 + 58 = 100"
+        Note over Logger,File: Write to Log File
+        Logger->>Logger: Format log message
+        Logger->>File: Write to File<br/>"[2024-XX-XX XX:XX:XX] [INFO] AddPlugin: Calculation result: 42 + 58 = 100"<br/>Log Message Format
     end
 ```
 
@@ -84,43 +84,43 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([系统启动<br/>System Start<br/>Systemstart]) --> Load1[加载 EntryPlugin<br/>Load EntryPlugin<br/>EntryPlugin laden]
-    Load1 --> Load2[加载 PointerTransferPlugin<br/>Load PointerTransferPlugin<br/>PointerTransferPlugin laden]
-    Load2 --> Load3[加载配置文件 .nxpt<br/>Load Configuration File .nxpt<br/>Konfigurationsdatei .nxpt laden]
+    Start([System Start]) --> Load1[Load EntryPlugin]
+    Load1 --> Load2[Load PointerTransferPlugin]
+    Load2 --> Load3[Load Configuration File .nxpt]
     
-    Load3 --> Init[系统初始化完成<br/>System Initialization Complete<br/>Systeminitialisierung abgeschlossen]
+    Load3 --> Init[System Initialization Complete]
     
-    Init --> Auto1[EntryPlugin 自动调用<br/>EntryPoint with 42<br/>通过符号查找获取 CallPlugin<br/>EntryPlugin Auto-call<br/>EntryPoint with 42<br/>Get CallPlugin via Symbol Lookup<br/>EntryPlugin automatischer Aufruf<br/>EntryPoint mit 42<br/>CallPlugin über Symbolsuche abrufen]
-    Auto1 --> Rule4{查找配置规则<br/>TransferRule_4<br/>Find Config Rule<br/>TransferRule_4<br/>Konfigurationsregel finden<br/>TransferRule_4}
+    Init --> Auto1[EntryPlugin Auto-call<br/>EntryPoint with 42<br/>Get CallPlugin via Symbol Lookup]
+    Auto1 --> Rule4{Find Config Rule<br/>TransferRule_4}
     
-    Rule4 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add参数0<br/>Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 0<br/>Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 0| Store1[存储参数 a = 42<br/>Store Parameter a = 42<br/>Parameter a = 42 speichern]
+    Rule4 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 0| Store1[Store Parameter a = 42]
     
-    Store1 --> Auto2[EntryPlugin 自动调用<br/>EntryPoint with 58<br/>通过符号查找获取 CallPlugin<br/>EntryPlugin Auto-call<br/>EntryPoint with 58<br/>Get CallPlugin via Symbol Lookup<br/>EntryPlugin automatischer Aufruf<br/>EntryPoint mit 58<br/>CallPlugin über Symbolsuche abrufen]
-    Auto2 --> Rule5{查找配置规则<br/>TransferRule_5<br/>Find Config Rule<br/>TransferRule_5<br/>Konfigurationsregel finden<br/>TransferRule_5}
+    Store1 --> Auto2[EntryPlugin Auto-call<br/>EntryPoint with 58<br/>Get CallPlugin via Symbol Lookup]
+    Auto2 --> Rule5{Find Config Rule<br/>TransferRule_5}
     
-    Rule5 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add参数1<br/>Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 1<br/>Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 1| Store2[存储参数 b = 58<br/>Store Parameter b = 58<br/>Parameter b = 58 speichern]
+    Rule5 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 1| Store2[Store Parameter b = 58]
     
-    Store2 --> Check1{检查参数是否完整?<br/>Check if Parameters Complete?<br/>Parameter vollständig prüfen?}
+    Store2 --> Check1{Check if Parameters Complete?}
     
-    Check1 -->|是<br/>Yes<br/>Ja| CallAdd[调用 AddPlugin.Add 42, 58<br/>Call AddPlugin.Add 42, 58<br/>AddPlugin.Add 42, 58 aufrufen]
+    Check1 -->|Yes| CallAdd[Call AddPlugin.Add 42, 58]
     
-    CallAdd --> Calc[AddPlugin 执行计算<br/>42 + 58 = 100<br/>AddPlugin Execute Calculation<br/>42 + 58 = 100<br/>AddPlugin Berechnung durchführen<br/>42 + 58 = 100]
+    CallAdd --> Calc[AddPlugin Execute Calculation<br/>42 + 58 = 100]
     
-    Calc --> Format[格式化结果字符串<br/>GetResultString<br/>Format Result String<br/>GetResultString<br/>Ergebniszeichenfolge formatieren<br/>GetResultString]
+    Calc --> Format[Format Result String<br/>GetResultString]
     
-    Format --> Rule9{查找主动调用规则<br/>TransferRule_9<br/>SourceParamIndex=-1<br/>Find Active Call Rule<br/>TransferRule_9<br/>SourceParamIndex=-1<br/>Aktive Aufrufregel finden<br/>TransferRule_9<br/>SourceParamIndex=-1}
+    Format --> Rule9{Find Active Call Rule<br/>TransferRule_9<br/>SourceParamIndex=-1}
     
-    Rule9 -->|Source: AddPlugin.Add<br/>Target: FileLoggerPlugin.Write参数1<br/>Source: AddPlugin.Add<br/>Target: FileLoggerPlugin.Write Parameter 1<br/>Source: AddPlugin.Add<br/>Target: FileLoggerPlugin.Write Parameter 1| GetExport[自动获取导出接口值<br/>GetResultString<br/>Auto-get Export Interface Value<br/>GetResultString<br/>Export-Schnittstellenwert automatisch abrufen<br/>GetResultString]
+    Rule9 -->|Source: AddPlugin.Add<br/>Target: FileLoggerPlugin.Write Parameter 1| GetExport[Auto-get Export Interface Value<br/>GetResultString]
     
-    GetExport --> Rule8{查找配置规则<br/>TransferRule_8<br/>Find Config Rule<br/>TransferRule_8<br/>Konfigurationsregel finden<br/>TransferRule_8}
+    GetExport --> Rule8{Find Config Rule<br/>TransferRule_8}
     
-    Rule8 -->|Target: FileLoggerPlugin.Write参数0<br/>Value: 2 INFO<br/>Target: FileLoggerPlugin.Write Parameter 0<br/>Value: 2 INFO<br/>Target: FileLoggerPlugin.Write Parameter 0<br/>Wert: 2 INFO| CallLogger[调用 FileLoggerPlugin.Write<br/>level=2, format=result_string<br/>Call FileLoggerPlugin.Write<br/>level=2, format=result_string<br/>FileLoggerPlugin.Write aufrufen<br/>level=2, format=result_string]
+    Rule8 -->|Target: FileLoggerPlugin.Write Parameter 0<br/>Value: 2 INFO| CallLogger[Call FileLoggerPlugin.Write<br/>level=2, format=result_string]
     
-    CallLogger --> Write[写入日志文件<br/>nxld_parser.log<br/>Write to Log File<br/>nxld_parser.log<br/>In Protokolldatei schreiben<br/>nxld_parser.log]
+    CallLogger --> Write[Write to Log File<br/>nxld_parser.log]
     
-    Write --> End([流程完成<br/>Process Complete<br/>Prozess abgeschlossen])
+    Write --> End([Process Complete])
     
-    Check1 -->|否<br/>No<br/>Nein| Wait[等待更多参数<br/>Wait for More Parameters<br/>Auf weitere Parameter warten]
+    Check1 -->|No| Wait[Wait for More Parameters]
     Wait --> Auto2
     
     style Start fill:#90EE90
@@ -138,6 +138,7 @@ Source: EntryPlugin.EntryPoint[0]
 Target: AddPlugin.Add[0] / AddPlugin.Add[1]
 Mode: broadcast
 ```
+**规则说明 / Rule Description / Regelbeschreibung:**
 这两个规则将 EntryPlugin 传递的两个数字分别发送到 AddPlugin 的两个参数位置。
 These two rules send the two numbers passed by EntryPlugin to the two parameter positions of AddPlugin respectively.
 Diese beiden Regeln senden die beiden vom EntryPlugin übergebenen Zahlen jeweils an die beiden Parameterpositionen des AddPlugins.
@@ -149,6 +150,7 @@ Target: FileLoggerPlugin.Write[1]
 Condition: not_null
 Mode: unicast
 ```
+**规则说明 / Rule Description / Regelbeschreibung:**
 这个规则定义了从 AddPlugin 的导出接口 GetResultString 获取值并传递给日志插件（懒等待模式）。此外，该规则还作为导出接口定义，为 TransferRule_9 提供接口名称。
 This rule defines getting the value from AddPlugin's export interface GetResultString and passing it to the logger plugin (lazy wait mode). Additionally, this rule also serves as an export interface definition, providing the interface name for TransferRule_9.
 Diese Regel definiert, den Wert von AddPlugins Export-Schnittstelle GetResultString abzurufen und an das Logger-Plugin zu übergeben (lazy wait Modus). Zusätzlich dient diese Regel auch als Export-Schnittstellendefinition und stellt den Schnittstellennamen für TransferRule_9 bereit.
@@ -156,10 +158,11 @@ Diese Regel definiert, den Wert von AddPlugins Export-Schnittstelle GetResultStr
 ### TransferRule_9
 ```
 Source: AddPlugin.Add
-SourceParamIndex: -1 (主动调用)
+SourceParamIndex: -1 (主动调用 / Active Call / Aktiver Aufruf)
 Target: FileLoggerPlugin.Write[1]
 Mode: unicast
 ```
+**规则说明 / Rule Description / Regelbeschreibung:**
 这个规则定义了主动调用机制：当 AddPlugin.Add 被调用后，自动从 GetResultString 导出接口获取值并传递给日志插件。TransferRule_9 通过查找配置规则（如 TransferRule_7）来发现导出接口名称，而不是使用硬编码的接口名称。
 This rule defines the active call mechanism: after AddPlugin.Add is called, automatically get value from GetResultString export interface and pass it to the logger plugin. TransferRule_9 discovers the export interface name by searching configuration rules (such as TransferRule_7), rather than using hardcoded interface names.
 Diese Regel definiert den aktiven Aufrufmechanismus: Nach Aufruf von AddPlugin.Add automatisch Wert von GetResultString Export-Schnittstelle abrufen und an Logger-Plugin übergeben. TransferRule_9 entdeckt den Export-Schnittstellennamen durch Suche in Konfigurationsregeln (wie TransferRule_7), anstatt hartcodierte Schnittstellennamen zu verwenden.
@@ -170,6 +173,7 @@ Target: FileLoggerPlugin.Write[0]
 TargetParamValue: 2
 Mode: unicast
 ```
+**规则说明 / Rule Description / Regelbeschreibung:**
 这个规则设置了日志插件的日志级别为 INFO (2)。
 This rule sets the log level of the logger plugin to INFO (2).
 Diese Regel setzt die Protokollierungsebene des Logger-Plugins auf INFO (2).
