@@ -76,7 +76,7 @@ sequenceDiagram
     rect rgb(240, 240, 255)
         Note over Logger,File: Write to Log File
         Logger->>Logger: Format log message
-        Logger->>File: Write to File<br/>"[2024-XX-XX XX:XX:XX] [INFO] AddPlugin: Calculation result: 42 + 58 = 100"<br/>Log Message Format
+        Logger->>File: Write to File<br/>"[2025-XX-XX XX:XX:XX] [INFO] AddPlugin: Calculation result: 42 + 58 = 100"<br/>Log Message Format
     end
 ```
 
