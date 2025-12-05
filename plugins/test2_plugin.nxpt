@@ -1,0 +1,32 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Generated manually / 手动生成
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules from Test2Plugin to other plugins
+# 此文件定义从Test2Plugin到其他插件的指针传递规则
+# Diese Datei definiert Zeigerübertragungsregeln vom Test2Plugin zu anderen Plugins
+
+[TransferRules]
+Count=2
+
+[TransferRule_0]
+SourcePlugin=Test2Plugin
+SourceInterface=TestPointerTransfer
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetInterface=Add
+TargetParamIndex=0
+Description=Transfer first number from Test2Plugin.TestPointerTransfer to AddPlugin.Add.a parameter
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_1]
+SourcePlugin=Test2Plugin
+SourceInterface=TestPointerTransfer
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetInterface=Add
+TargetParamIndex=1
+Description=Transfer second number from Test2Plugin.TestPointerTransfer to AddPlugin.Add.b parameter
+TransferMode=unicast
+Enabled=true
+

@@ -1,0 +1,12 @@
+# 编译产物 / Build artifacts (只保留需要的)
+*.obj
+*.lib
+*.so
+*.log
+
+# SCons 构建文件 / SCons build files
+.sconsign.dblite
+
+# 其他可执行文件（只保留 nx_main.exe）
+test_*.exe
+

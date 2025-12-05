@@ -1,0 +1,148 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Generated manually / 手动生成
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules from PointerTransferPlugin to other plugins
+# 此文件定义从PointerTransferPlugin到其他插件的指针传递规则
+# Diese Datei definiert Zeigerübertragungsregeln vom PointerTransferPlugin zu anderen Plugins
+
+[TransferRules]
+Count=12
+
+[TransferRule_0]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=0
+TargetPlugin=WindowPlugin
+TargetInterface=CreateWindow
+TargetParamIndex=0
+Description=Transfer pointer from TransferPointer.ptr to CreateWindow.title parameter / 将指针从TransferPointer.ptr传递到CreateWindow.title参数 / Zeiger von TransferPointer.ptr zu CreateWindow.title-Parameter übertragen
+Enabled=true
+
+[TransferRule_1]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=0
+TargetPlugin=EntryPlugin
+TargetInterface=EntryPoint
+TargetParamIndex=0
+Description=Transfer pointer from TransferPointer.ptr to EntryPoint.entry_data parameter / 将指针从TransferPointer.ptr传递到EntryPoint.entry_data参数 / Zeiger von TransferPointer.ptr zu EntryPoint.entry_data-Parameter übertragen
+Enabled=true
+
+[TransferRule_2]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetInterface=Add
+TargetParamIndex=0
+Description=Transfer first number from TransferPointer.ptr to Add.a parameter / 将第一个数字从TransferPointer.ptr传递到Add.a参数 / Erste Zahl von TransferPointer.ptr zu Add.a-Parameter übertragen
+Enabled=true
+
+[TransferRule_3]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetInterface=Add
+TargetParamIndex=1
+Description=Transfer second number from TransferPointer.ptr to Add.b parameter / 将第二个数字从TransferPointer.ptr传递到Add.b参数 / Zweite Zahl von TransferPointer.ptr zu Add.b-Parameter übertragen
+Enabled=true
+
+[TransferRule_4]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=Add
+TargetParamIndex=0
+Description=Transfer first number from EntryPlugin.EntryPoint to AddPlugin.Add.a parameter / 将第一个数字从EntryPlugin.EntryPoint传递到AddPlugin.Add.a参数 / Erste Zahl von EntryPlugin.EntryPoint zu AddPlugin.Add.a-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+[TransferRule_5]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=Add
+TargetParamIndex=1
+Description=Transfer second number from EntryPlugin.EntryPoint to AddPlugin.Add.b parameter / 将第二个数字从EntryPlugin.EntryPoint传递到AddPlugin.Add.b参数 / Zweite Zahl von EntryPlugin.EntryPoint zu AddPlugin.Add.b-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+[TransferRule_6]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Call FileLoggerPlugin.Write from EntryPlugin.EntryPoint parameter / 从EntryPlugin.EntryPoint参数调用FileLoggerPlugin.Write / FileLoggerPlugin.Write von EntryPlugin.EntryPoint-Parameter aufrufen
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_7]
+SourcePlugin=AddPlugin
+SourceInterface=GetResultString
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+TargetParamValue=
+Condition=not_null
+Description=Transfer AddPlugin.GetResultString result to FileLoggerPlugin.Write format parameter (only when result is not null) / 将AddPlugin.GetResultString结果传递到FileLoggerPlugin.Write格式化参数（仅当结果不为空时） / AddPlugin.GetResultString-Ergebnis zu FileLoggerPlugin.Write-Formatparameter übertragen (nur wenn Ergebnis nicht null ist)
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_8]
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=0
+TargetParamValue=2
+Description=Set constant log level (2=INFO) for FileLoggerPlugin.Write level parameter / 为FileLoggerPlugin.Write级别参数设置常量日志级别（2=INFO） / Konstante Protokollierungsebene (2=INFO) für FileLoggerPlugin.Write-Ebenenparameter festlegen
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_9]
+SourcePlugin=AddPlugin
+SourceInterface=Add
+SourceParamIndex=-1
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Active call rule: automatically call FileLoggerPlugin.Write with GetResultString value after AddPlugin.Add is called / 主动调用规则：AddPlugin.Add被调用后自动使用GetResultString值调用FileLoggerPlugin.Write / Aktive Aufrufregel: FileLoggerPlugin.Write nach Aufruf von AddPlugin.Add automatisch mit GetResultString-Wert aufrufen
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_10]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=-1
+TargetPlugin=EntryPlugin
+TargetPluginPath=./plugins/entry_plugin.dll
+TargetInterface=EntryPoint
+TargetParamIndex=0
+TargetParamValue=42
+Description=Active call rule: automatically call EntryPlugin.EntryPoint with test data (42) after PointerTransferPlugin.TransferPointer is called / 主动调用规则：PointerTransferPlugin.TransferPointer被调用后自动使用测试数据（42）调用EntryPlugin.EntryPoint / Aktive Aufrufregel: EntryPlugin.EntryPoint nach Aufruf von PointerTransferPlugin.TransferPointer automatisch mit Testdaten (42) aufrufen
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_11]
+SourcePlugin=PointerTransferPlugin
+SourceInterface=TransferPointer
+SourceParamIndex=-1
+TargetPlugin=EntryPlugin
+TargetPluginPath=./plugins/entry_plugin.dll
+TargetInterface=EntryPoint
+TargetParamIndex=0
+TargetParamValue=58
+Description=Active call rule: automatically call EntryPlugin.EntryPoint with test data (58) after PointerTransferPlugin.TransferPointer is called / 主动调用规则：PointerTransferPlugin.TransferPointer被调用后自动使用测试数据（58）调用EntryPlugin.EntryPoint / Aktive Aufrufregel: EntryPlugin.EntryPoint nach Aufruf von PointerTransferPlugin.TransferPointer automatisch mit Testdaten (58) aufrufen
+TransferMode=unicast
+Enabled=true
+

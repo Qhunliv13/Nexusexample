@@ -1,0 +1,65 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=PointerTransferPlugin
+Version=2.0.0
+UID=xaiLn8WmuxoyhelAWvpfO3zMgC8uOjAENGGba7puLUEVrGi2JD9pkwPgrvDwVsdC
+Path=.\plugins/pointer_transfer_plugin.dll
+
+[Interfaces]
+Count=2
+
+[Interface_0]
+Name=TransferPointer
+Description=Transfer pointer based on .nxpt configuration rules / 根据.nxpt配置规则传递指针 / Zeiger basierend auf .nxpt-Konfigurationsregeln übertragen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=4
+MaxParamCount=4
+FixedParamCount=4
+Params=
+  [0]
+    Name=ptr
+    Type=pointer
+    TypeName=void*
+  [1]
+    Name=expected_type
+    Type=int
+    TypeName=nxld_param_type_t
+  [2]
+    Name=type_name
+    Type=string
+    TypeName=const char*
+  [3]
+    Name=data_size
+    Type=long
+    TypeName=size_t
+
+[Interface_1]
+Name=CallPlugin
+Description=Call target plugin interface based on transfer rules / 根据传递规则调用目标插件接口 / Ziel-Plugin-Schnittstelle basierend auf Übertragungsregeln aufrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=4
+MaxParamCount=4
+FixedParamCount=4
+Params=
+  [0]
+    Name=source_plugin_name
+    Type=string
+    TypeName=const char*
+  [1]
+    Name=source_interface_name
+    Type=string
+    TypeName=const char*
+  [2]
+    Name=param_index
+    Type=int
+    TypeName=int
+  [3]
+    Name=param_value
+    Type=pointer
+    TypeName=void*
+
