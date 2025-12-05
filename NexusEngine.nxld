@@ -1,7 +1,7 @@
 [EngineCore]
 LockMode=1
 MaxRootPlugins=5
-EnabledRootPlugins=./plugins/pointer_transfer_plugin.dll,./plugins/test2_plugin.dll
+EnabledRootPlugins=./plugins/pointer_transfer_plugin.dll,./plugins/entry_plugin.dll
 
 [RootPluginVirtualParent]
 
