@@ -1,0 +1,33 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules from AddPlugin to other plugins / 此文件定义从AddPlugin到其他插件的指针传递规则 / Diese Datei definiert Zeigerübertragungsregeln vom AddPlugin zu anderen Plugins
+
+[TransferRules]
+Count=2
+
+[TransferRule_0]
+SourcePlugin=AddPlugin
+SourceInterface=GetResultString
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+TargetParamValue=
+Condition=not_null
+Description=Transfer AddPlugin.GetResultString result to FileLoggerPlugin.Write format parameter (only when result is not null) / 将AddPlugin.GetResultString结果传递到FileLoggerPlugin.Write格式化参数（仅当结果不为空时） / AddPlugin.GetResultString-Ergebnis zu FileLoggerPlugin.Write-Formatparameter übertragen (nur wenn Ergebnis nicht null ist)
+TransferMode=unicast
+Enabled=true
+
+[TransferRule_1]
+SourcePlugin=AddPlugin
+SourceInterface=Add
+SourceParamIndex=-1
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Active call rule: automatically call FileLoggerPlugin.Write with GetResultString value after AddPlugin.Add is called / 主动调用规则：AddPlugin.Add被调用后自动使用GetResultString值调用FileLoggerPlugin.Write / Aktive Aufrufregel: FileLoggerPlugin.Write nach Aufruf von AddPlugin.Add automatisch mit GetResultString-Wert aufrufen
+TransferMode=unicast
+Enabled=true
+

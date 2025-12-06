@@ -1,0 +1,31 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=EntryPlugin
+Version=1.0.0
+UID=E6XozTbuwagSYhJvMP9ttp1eGfeizGdPODNJjCaYZGH8bbBVpsZpM9wwCES7LMdO
+Path=.\plugins/entry_plugin.dll
+
+[Interfaces]
+Count=1
+
+[Interface_0]
+Name=EntryPoint
+Description=Entry point interface for starting call chain / 启动调用链的入口点接口 / Einstiegspunkt-Schnittstelle zum Starten der Aufrufkette
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=2
+MaxParamCount=2
+FixedParamCount=2
+Params=
+  [0]
+    Name=entry_data
+    Type=pointer
+    TypeName=void*
+  [1]
+    Name=data_type
+    Type=int
+    TypeName=nxld_param_type_t
+

@@ -1,0 +1,196 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules from EntryPlugin to other plugins / 此文件定义从EntryPlugin到其他插件的指针传递规则 / Diese Datei definiert Zeigerübertragungsregeln vom EntryPlugin zu anderen Plugins
+
+[TransferRules]
+Count=13
+
+# Step 0: Start timer / 开始计时
+[TransferRule_0]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=TimerPlugin
+TargetPluginPath=./plugins/timer_plugin.dll
+TargetInterface=StartTimer
+TargetParamIndex=0
+Description=Start timer before generating random numbers / 在生成随机数之前启动计时器 / Timer vor Generierung von Zufallszahlen starten
+TransferMode=broadcast
+Enabled=true
+
+# Step 1: Set random number range (10-99) / 设置随机数范围（10-99）
+[TransferRule_1]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=RandomGeneratorPlugin
+TargetPluginPath=./plugins/random_generator_plugin.dll
+TargetInterface=SetRange
+TargetParamIndex=0
+TargetParamValue=10
+Description=Set RandomGeneratorPlugin.SetRange minimum value to 10 / 设置RandomGeneratorPlugin.SetRange最小值为10 / RandomGeneratorPlugin.SetRange-Mindestwert auf 10 setzen
+TransferMode=broadcast
+Enabled=true
+
+[TransferRule_2]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=RandomGeneratorPlugin
+TargetPluginPath=./plugins/random_generator_plugin.dll
+TargetInterface=SetRange
+TargetParamIndex=1
+TargetParamValue=99
+Description=Set RandomGeneratorPlugin.SetRange maximum value to 99 / 设置RandomGeneratorPlugin.SetRange最大值为99 / RandomGeneratorPlugin.SetRange-Maximalwert auf 99 setzen
+TransferMode=broadcast
+Enabled=true
+
+# Step 2: Set count to 200000000 / 设置数量为200000000
+[TransferRule_3]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=RandomGeneratorPlugin
+TargetPluginPath=./plugins/random_generator_plugin.dll
+TargetInterface=SetCount
+TargetParamIndex=0
+TargetParamValue=200000000
+Description=Set RandomGeneratorPlugin.SetCount to 200000000 / 设置RandomGeneratorPlugin.SetCount为200000000 / RandomGeneratorPlugin.SetCount auf 200000000 setzen
+TransferMode=broadcast
+Enabled=true
+
+# Step 3: Generate random numbers (active call after SetCount) / 生成随机数（SetCount后的主动调用）
+[TransferRule_4]
+SourcePlugin=RandomGeneratorPlugin
+SourceInterface=SetCount
+SourceParamIndex=-1
+TargetPlugin=RandomGeneratorPlugin
+TargetPluginPath=./plugins/random_generator_plugin.dll
+TargetInterface=Generate
+TargetParamIndex=0
+Description=Active call: After SetCount, automatically call Generate to generate 200000000 random numbers / 主动调用：SetCount完成后自动调用Generate生成200000000个随机数 / Aktiver Aufruf: Nach SetCount automatisch Generate aufrufen, um 200000000 Zufallszahlen zu generieren
+TransferMode=unicast
+Enabled=true
+
+# Step 4: After Generate, automatically transfer result to AddPlugin / Generate完成后，自动将结果传递给AddPlugin
+# Export interface rule: GetResult -> AddArray[0] / 导出接口规则：GetResult -> AddArray[0]
+[TransferRule_5]
+SourcePlugin=RandomGeneratorPlugin
+SourceInterface=GetResult
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=AddArray
+TargetParamIndex=0
+Description=Transfer RandomGeneratorPlugin.GetResult array pointer to AddPlugin.AddArray array parameter / 将RandomGeneratorPlugin.GetResult数组指针传递给AddPlugin.AddArray数组参数 / RandomGeneratorPlugin.GetResult-Array-Zeiger an AddPlugin.AddArray-Array-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+# Active call rule: After Generate, automatically call GetResult -> AddArray[0] / 主动调用规则：Generate完成后自动调用GetResult -> AddArray[0]
+[TransferRule_6]
+SourcePlugin=RandomGeneratorPlugin
+SourceInterface=Generate
+SourceParamIndex=-1
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=AddArray
+TargetParamIndex=0
+Description=Active call: After Generate, get GetResult and transfer to AddArray[0] / 主动调用：Generate完成后获取GetResult并传递给AddArray[0] / Aktiver Aufruf: Nach Generate GetResult abrufen und an AddArray[0] übertragen
+TransferMode=broadcast
+Enabled=true
+
+# Export interface rule: GetResultCount -> AddArray[1] / 导出接口规则：GetResultCount -> AddArray[1]
+[TransferRule_7]
+SourcePlugin=RandomGeneratorPlugin
+SourceInterface=GetResultCount
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=AddArray
+TargetParamIndex=1
+Description=Transfer RandomGeneratorPlugin.GetResultCount to AddPlugin.AddArray count parameter / 将RandomGeneratorPlugin.GetResultCount传递给AddPlugin.AddArray数量参数 / RandomGeneratorPlugin.GetResultCount an AddPlugin.AddArray-Anzahl-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+# Active call rule: After Generate, automatically call GetResultCount -> AddArray[1] / 主动调用规则：Generate完成后自动调用GetResultCount -> AddArray[1]
+[TransferRule_8]
+SourcePlugin=RandomGeneratorPlugin
+SourceInterface=Generate
+SourceParamIndex=-1
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=AddArray
+TargetParamIndex=1
+Description=Active call: After Generate, get GetResultCount and transfer to AddArray[1] / 主动调用：Generate完成后获取GetResultCount并传递给AddArray[1] / Aktiver Aufruf: Nach Generate GetResultCount abrufen und an AddArray[1] übertragen
+TransferMode=broadcast
+Enabled=true
+
+# Step 5: Stop timer and log result after calculation / 计算完成后停止计时器并记录结果
+# Active call rule: After AddArray, automatically stop timer / 主动调用规则：AddArray完成后自动停止计时器
+[TransferRule_9]
+SourcePlugin=AddPlugin
+SourceInterface=AddArray
+SourceParamIndex=-1
+TargetPlugin=TimerPlugin
+TargetPluginPath=./plugins/timer_plugin.dll
+TargetInterface=StopTimer
+TargetParamIndex=0
+Description=Active call: After AddArray, automatically stop timer / 主动调用：AddArray完成后自动停止计时器 / Aktiver Aufruf: Nach AddArray Timer automatisch stoppen
+TransferMode=broadcast
+Enabled=true
+
+# Active call rule: After AddArray, automatically call GetResultString -> FileLoggerPlugin / 主动调用规则：AddArray完成后自动调用GetResultString -> FileLoggerPlugin
+[TransferRule_10]
+SourcePlugin=AddPlugin
+SourceInterface=AddArray
+SourceParamIndex=-1
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Active call: After AddArray, get GetResultString and transfer to FileLoggerPlugin.Write / 主动调用：AddArray完成后获取GetResultString并传递给FileLoggerPlugin.Write / Aktiver Aufruf: Nach AddArray GetResultString abrufen und an FileLoggerPlugin.Write übertragen
+TransferMode=broadcast
+Enabled=true
+
+# Export interface rule: GetResultString -> FileLoggerPlugin / 导出接口规则：GetResultString -> FileLoggerPlugin
+[TransferRule_11]
+SourcePlugin=AddPlugin
+SourceInterface=GetResultString
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+TargetParamValue=
+Condition=not_null
+Description=Log AddPlugin calculation result to FileLoggerPlugin / 将AddPlugin计算结果记录到FileLoggerPlugin / AddPlugin-Berechnungsergebnis an FileLoggerPlugin protokollieren
+TransferMode=unicast
+Enabled=true
+
+# Active call rule: After StopTimer, get elapsed time string and log to FileLoggerPlugin / 主动调用规则：StopTimer完成后获取经过的时间字符串并记录到FileLoggerPlugin
+[TransferRule_12]
+SourcePlugin=TimerPlugin
+SourceInterface=StopTimer
+SourceParamIndex=-1
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Active call: After StopTimer, get GetElapsedTimeString and log to FileLoggerPlugin / 主动调用：StopTimer完成后获取GetElapsedTimeString并记录到FileLoggerPlugin / Aktiver Aufruf: Nach StopTimer GetElapsedTimeString abrufen und an FileLoggerPlugin protokollieren
+TransferMode=unicast
+Enabled=true
+
+# Export interface rule: GetElapsedTimeString -> FileLoggerPlugin / 导出接口规则：GetElapsedTimeString -> FileLoggerPlugin
+[TransferRule_13]
+SourcePlugin=TimerPlugin
+SourceInterface=GetElapsedTimeString
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+TargetParamValue=
+Condition=not_null
+Description=Transfer TimerPlugin.GetElapsedTimeString to FileLoggerPlugin.Write format parameter / 将TimerPlugin.GetElapsedTimeString传递给FileLoggerPlugin.Write格式参数 / TimerPlugin.GetElapsedTimeString an FileLoggerPlugin.Write-Formatparameter übertragen
+TransferMode=unicast
+Enabled=true

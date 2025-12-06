@@ -1,0 +1,75 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=RandomGeneratorPlugin
+Version=1.0.0
+UID=5eV4UAm9yna55jhLGD452rl858Qf77BhgNhvdnTlI26Mhba0QOoNJCu0CqdIt8eN
+Path=.\plugins/random_generator_plugin.dll
+
+[Interfaces]
+Count=5
+
+[Interface_0]
+Name=SetRange
+Description=Set random number generation range (min, max) / 设置随机数生成区间（最小值，最大值） / Zufallszahlengenerierungsbereich festlegen (Min, Max)
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=2
+MaxParamCount=2
+FixedParamCount=2
+Params=
+  [0]
+    Name=min
+    Type=int
+    TypeName=int
+  [1]
+    Name=max
+    Type=int
+    TypeName=int
+
+[Interface_1]
+Name=SetCount
+Description=Set count of random numbers to generate / 设置生成随机数的数量 / Anzahl der zu generierenden Zufallszahlen festlegen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=1
+MaxParamCount=1
+FixedParamCount=1
+Params=
+  [0]
+    Name=count
+    Type=int
+    TypeName=int
+
+[Interface_2]
+Name=Generate
+Description=Generate random numbers based on current settings / 根据当前设置生成随机数 / Zufallszahlen basierend auf aktuellen Einstellungen generieren
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_3]
+Name=GetResult
+Description=Get pointer to generated random number result array / 获取生成的随机数结果数组指针 / Zeiger auf generiertes Zufallszahlenergebnis-Array abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_4]
+Name=GetResultCount
+Description=Get count of generated results / 获取生成的结果数量 / Anzahl der generierten Ergebnisse abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+

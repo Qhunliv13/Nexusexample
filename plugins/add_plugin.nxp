@@ -1,0 +1,51 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=AddPlugin
+Version=1.0.0
+UID=XoeMGGgdsTr8tLUIxmd8mtB3n2VlIbTgk7ApcfKSRuPx0DGya953T8ggFsBqcDOQ
+Path=.\plugins/add_plugin.dll
+
+[Interfaces]
+Count=3
+
+[Interface_0]
+Name=Add
+Description=Perform addition calculation with two integer operands / 执行两个整数操作数的加法计算 / Additionsberechnung mit zwei ganzzahligen Operanden durchführen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=2
+MaxParamCount=2
+FixedParamCount=2
+Params=
+  [0]
+    Name=a
+    Type=int
+    TypeName=int
+  [1]
+    Name=b
+    Type=int
+    TypeName=int
+
+[Interface_1]
+Name=GetResult
+Description=Get last calculation result pointer / 获取最后一次计算结果的指针 / Zeiger auf letztes Berechnungsergebnis abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_2]
+Name=GetResultString
+Description=Get last calculation result as formatted string / 获取最后一次计算结果的格式化字符串 / Letztes Berechnungsergebnis als formatierte Zeichenfolge abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+

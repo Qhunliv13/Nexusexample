@@ -1,0 +1,11 @@
+# Entry Plugin Configuration File / 入口插件配置文件 / Einstiegs-Plugin-Konfigurationsdatei
+# Format: NXIN v1.0 / 格式: NXIN v1.0
+# This file defines entry data items to be passed to EntryPoint interface / 此文件定义传递给EntryPoint接口的入口数据项 / Diese Datei definiert Einstiegsdaten-Elemente, die an EntryPoint-Schnittstelle übergeben werden
+# Note: The actual call chain is configured in entry_plugin.nxpt / 注意：实际的调用链在entry_plugin.nxpt中配置 / Hinweis: Die tatsächliche Aufrufkette wird in entry_plugin.nxpt konfiguriert
+
+[EntryData]
+
+[EntryData_0]
+Type=int
+Value=1
+

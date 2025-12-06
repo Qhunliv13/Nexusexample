@@ -1,0 +1,55 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=FileLoggerPlugin
+Version=1.0.0
+UID=UsMTvR2diQh7msDOqEjBsaaFSEz9K2UWvM8uhGsBIJUVlMtCzzNLhDyfLON4vBaj
+Path=.\plugins/file_logger_plugin.dll
+
+[Interfaces]
+Count=3
+
+[Interface_0]
+Name=Init
+Description=Initialize file logger with configuration string / 使用配置字符串初始化文件日志器 / Datei-Logger mit Konfigurationszeichenfolge initialisieren
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=1
+MaxParamCount=1
+FixedParamCount=1
+Params=
+  [0]
+    Name=config
+    Type=string
+    TypeName=const char*
+
+[Interface_1]
+Name=Close
+Description=Close file logger and release resources / 关闭文件日志器并释放资源 / Datei-Logger schließen und Ressourcen freigeben
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_2]
+Name=Write
+Description=Write log message to file / 将日志消息写入文件 / Protokollnachricht in Datei schreiben
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=2
+MaxParamCount=2
+FixedParamCount=2
+Params=
+  [0]
+    Name=level
+    Type=int
+    TypeName=logger_level_t
+  [1]
+    Name=format
+    Type=string
+    TypeName=const char*
+

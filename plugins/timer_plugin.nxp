@@ -1,0 +1,63 @@
+# NXLD Plugin Metadata File / NXLD插件元数据文件
+# Generated automatically / 自动生成
+# Format: NXP v1.0 / 格式: NXP v1.0
+
+[Plugin]
+Name=TimerPlugin
+Version=1.0.0
+UID=OyTvNPMsv69AOTwXLNxKWaQRD2apXLR0VZpZO8ewbh9JuLU1VaT93RYlnPOXnGWI
+Path=.\plugins/timer_plugin.dll
+
+[Interfaces]
+Count=5
+
+[Interface_0]
+Name=StartTimer
+Description=Start the timer / 开始计时 / Timer starten
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_1]
+Name=StopTimer
+Description=Stop the timer / 停止计时 / Timer stoppen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_2]
+Name=GetElapsedTime
+Description=Get elapsed time in milliseconds / 获取经过的时间（毫秒） / Verstrichene Zeit in Millisekunden abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_3]
+Name=GetElapsedTimeSeconds
+Description=Get elapsed time in seconds as float / 获取经过的时间（秒，浮点数） / Verstrichene Zeit in Sekunden als Gleitkommazahl abrufen
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
+[Interface_4]
+Name=GetTimerStatus
+Description=Get timer status (1=running, 0=stopped) / 获取计时器状态（1=运行中，0=已停止） / Timer-Status abrufen (1=läuft, 0=gestoppt)
+Version=1.0.0
+ParamCountType=fixed
+MinParamCount=0
+MaxParamCount=0
+FixedParamCount=0
+Params=none
+
