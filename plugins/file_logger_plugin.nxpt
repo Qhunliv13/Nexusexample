@@ -1,0 +1,17 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules for FileLoggerPlugin / 此文件定义FileLoggerPlugin的指针传递规则 / Diese Datei definiert Zeigerübertragungsregeln für FileLoggerPlugin
+
+[TransferRules]
+Count=1
+
+[TransferRule_0]
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=0
+TargetParamValue=2
+Description=Set constant log level (2=INFO) for FileLoggerPlugin.Write level parameter / 为FileLoggerPlugin.Write级别参数设置常量日志级别（2=INFO） / Konstante Protokollierungsebene (2=INFO) für FileLoggerPlugin.Write-Ebenenparameter festlegen
+TransferMode=unicast
+Enabled=true
+

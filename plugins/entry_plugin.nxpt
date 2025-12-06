@@ -1,0 +1,42 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines pointer transfer rules from EntryPlugin to other plugins / 此文件定义从EntryPlugin到其他插件的指针传递规则 / Diese Datei definiert Zeigerübertragungsregeln vom EntryPlugin zu anderen Plugins
+
+[TransferRules]
+Count=3
+
+[TransferRule_0]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=Add
+TargetParamIndex=0
+Description=Transfer first number from EntryPlugin.EntryPoint to AddPlugin.Add.a parameter / 将第一个数字从EntryPlugin.EntryPoint传递到AddPlugin.Add.a参数 / Erste Zahl von EntryPlugin.EntryPoint zu AddPlugin.Add.a-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+[TransferRule_1]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=AddPlugin
+TargetPluginPath=./plugins/add_plugin.dll
+TargetInterface=Add
+TargetParamIndex=1
+Description=Transfer second number from EntryPlugin.EntryPoint to AddPlugin.Add.b parameter / 将第二个数字从EntryPlugin.EntryPoint传递到AddPlugin.Add.b参数 / Zweite Zahl von EntryPlugin.EntryPoint zu AddPlugin.Add.b-Parameter übertragen
+TransferMode=broadcast
+Enabled=true
+
+[TransferRule_2]
+SourcePlugin=EntryPlugin
+SourceInterface=EntryPoint
+SourceParamIndex=0
+TargetPlugin=FileLoggerPlugin
+TargetPluginPath=./plugins/file_logger_plugin.dll
+TargetInterface=Write
+TargetParamIndex=1
+Description=Call FileLoggerPlugin.Write from EntryPlugin.EntryPoint parameter / 从EntryPlugin.EntryPoint参数调用FileLoggerPlugin.Write / FileLoggerPlugin.Write von EntryPlugin.EntryPoint-Parameter aufrufen
+TransferMode=unicast
+Enabled=true
