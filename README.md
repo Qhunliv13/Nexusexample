@@ -1,205 +1,167 @@
-# NXLD 计算流程示例图 / Calculation Workflow Diagram / Berechnungsworkflow-Diagramm
+# NXLD 链式加载流程文档 / Chain Loading Workflow Documentation / Kettenladungs-Workflow-Dokumentation
 
-**项目仓库 / Project Repository / Projekt-Repository:** [https://github.com/Qhunliv13/Nexusexample](https://github.com/Qhunliv13/Nexusexample)
+本文档描述了重构后的 NXLD 指针传递插件的链式加载机制和完整工作流程。
+This document describes the chain loading mechanism and complete workflow of the refactored NXLD pointer transfer plugin.
+Dieses Dokument beschreibt den Kettenladungsmechanismus und den vollständigen Workflow des refactorierten NXLD-Zeigerübertragungs-Plugins.
 
-本文档描述了完整的插件计算流程示例，展示了从 EntryPlugin 到 FileLoggerPlugin 的完整数据流转过程。
-This document describes a complete plugin calculation workflow example, showing the complete data flow process from EntryPlugin to FileLoggerPlugin.
-Dieses Dokument beschreibt ein vollständiges Plugin-Berechnungsworkflow-Beispiel und zeigt den vollständigen Datenflussprozess vom EntryPlugin zum FileLoggerPlugin.
+## 架构设计 / Architecture Design / Architektur-Design
 
-## 完整计算流程 / Complete Calculation Workflow / Vollständiger Berechnungsworkflow
+### 核心原则 / Core Principles / Kernprinzipien
 
-### 序列图 / Sequence Diagram / Sequenzdiagramm
+1. **去中心化配置 / Decentralized Configuration / Dezentralisierte Konfiguration**
+   - 每个插件拥有自己的 `.nxpt` 配置文件 / Each plugin has its own `.nxpt` configuration file / Jedes Plugin hat seine eigene `.nxpt`-Konfigurationsdatei
+   - 配置规则分散在各个插件的配置文件中 / Configuration rules are distributed across plugin configuration files / Konfigurationsregeln sind über Plugin-Konfigurationsdateien verteilt
 
-```mermaid
-sequenceDiagram
-    participant Engine as NXLD Engine
-    participant Entry as EntryPlugin
-    participant PT as PointerTransferPlugin
-    participant Add as AddPlugin
-    participant Logger as FileLoggerPlugin
-    participant Config as .nxpt Config
-    participant File as Log File
+2. **链式加载机制 / Chain Loading Mechanism / Kettenladungsmechanismus**
+   - PointerTransferPlugin 启动时只加载入口插件的 `.nxpt` 文件 / PointerTransferPlugin only loads entry plugin's `.nxpt` file on startup / PointerTransferPlugin lädt beim Start nur die `.nxpt`-Datei des Einstiegs-Plugins
+   - 根据入口插件的规则链式加载其他插件的 `.nxpt` 文件 / Chain load other plugins' `.nxpt` files according to entry plugin's rules / Kettenweise andere Plugins' `.nxpt`-Dateien gemäß Einstiegs-Plugin-Regeln laden
 
-    Note over Engine: System Initialization
-    Engine->>Entry: Load Plugin
-    Engine->>PT: Load Plugin
-    PT->>Config: Read Transfer Rules
-    
-    Note over Entry: Auto-execute on Load
-    Entry->>Entry: DllMain/Constructor<br/>Pass entry_data_a = 42<br/>Get CallPlugin function pointer via symbol lookup
-    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &42)<br/>Call Plugin Interface
-    
-    rect rgb(200, 220, 255)
-        Note over PT,Config: Process by TransferRule_4
-        PT->>Config: Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
-        Config-->>PT: Return Rule: Target=AddPlugin.Add[0]
-        PT->>Add: Call Add(a=42, b=?)
-    end
-    
-    Entry->>Entry: DllMain/Constructor<br/>Pass entry_data_b = 58<br/>Get CallPlugin function pointer via symbol lookup
-    Entry->>PT: CallPlugin(EntryPlugin,<br/>EntryPoint, 0, &58)<br/>Call Plugin Interface
-    
-    rect rgb(200, 220, 255)
-        Note over PT,Config: Process by TransferRule_5
-        PT->>Config: Find Rule: Source=EntryPlugin,<br/>SourceInterface=EntryPoint
-        Config-->>PT: Return Rule: Target=AddPlugin.Add[1]
-        PT->>Add: Call Add(a=42, b=58)
-    end
-    
-    rect rgb(255, 240, 200)
-        Note over Add: Execute Calculation
-        Add->>Add: Calculate: 42 + 58 = 100
-        Add->>Add: Format result string
-        Add->>Add: GetResultString() =<br/>"AddPlugin: Calculation result: 42 + 58 = 100"<br/>Get Result String
-    end
-    
-    rect rgb(255, 220, 220)
-        Note over PT,Config: Active Call Rule (TransferRule_9)
-        PT->>Config: Find Active Call Rule: Source=AddPlugin.Add,<br/>SourceParamIndex=-1
-        Config-->>PT: Return Rule: TransferRule_9<br/>Target=FileLoggerPlugin.Write[1]
-        
-        Note over PT,Config: Find Export Interface Name
-        PT->>Config: Find Config Rule: Source=AddPlugin,<br/>SourceInterface!=Add
-        Config-->>PT: Return Rule: TransferRule_7<br/>SourceInterface=GetResultString
-        
-        Note over PT,Add: Auto-get Export Interface Value
-        PT->>Add: Call GetResultString()<br/>Get calculation result string
-        Add-->>PT: Return result string
-        
-        Note over PT,Config: Set Log Level by TransferRule_8
-        PT->>Config: Find Rule: Target=FileLoggerPlugin.Write[0]
-        Config-->>PT: Return Rule: TargetParamValue=2 (INFO)
-        
-        PT->>Logger: Call Write(level=2,<br/>format="AddPlugin: Calculation result: 42 + 58 = 100")
-    end
-    
-    rect rgb(240, 240, 255)
-        Note over Logger,File: Write to Log File
-        Logger->>Logger: Format log message
-        Logger->>File: Write to File<br/>"[2025-XX-XX XX:XX:XX] [INFO] AddPlugin: Calculation result: 42 + 58 = 100"<br/>Log Message Format
-    end
-```
+3. **延迟加载插件 / Lazy Plugin Loading / Lazy Plugin-Ladung**
+   - 插件只在需要时加载，而非在加载 `.nxpt` 时加载 / Plugins are loaded only when needed, not when loading `.nxpt` / Plugins werden nur bei Bedarf geladen, nicht beim Laden von `.nxpt`
+   - 根据条件传递暂缓启动，只在实际传递时进行启动插件 / Defer plugin startup based on transfer conditions, only start plugins during actual transfer / Plugin-Start basierend auf Übertragungsbedingungen verzögern, Plugins nur bei tatsächlicher Übertragung starten
 
-### 流程图 / Flow Chart / Flussdiagramm
+## 完整工作流程 / Complete Workflow / Vollständiger Workflow
 
 ```mermaid
-flowchart TD
-    Start([System Start]) --> Load1[Load EntryPlugin]
-    Load1 --> Load2[Load PointerTransferPlugin]
-    Load2 --> Load3[Load Configuration File .nxpt]
+graph TB
+
+    subgraph Phase1[阶段1: 初始化 / Phase 1: Initialization / Phase 1: Initialisierung]
+
+        A1[引擎启动<br/>Engine Start<br/>Engine-Start] --> A2[加载PointerTransferPlugin<br/>Load PointerTransferPlugin<br/>PointerTransferPlugin laden]
+
+        A2 --> A3[读取pointer_transfer_plugin.nxpt<br/>Read pointer_transfer_plugin.nxpt<br/>pointer_transfer_plugin.nxpt lesen]
+
+        A3 --> A4[解析入口插件配置<br/>Parse Entry Plugin Config<br/>Einstiegs-Plugin-Konfiguration parsen]
+
+        A4 --> A5[加载entry_plugin.nxpt<br/>Load entry_plugin.nxpt<br/>entry_plugin.nxpt laden]
+
+        A5 --> A6[链式加载相关插件.nxpt<br/>Chain Load Related Plugin .nxpt<br/>Verwandte Plugin-.nxpt kettenweise laden]
+
+    end
+
     
-    Load3 --> Init[System Initialization Complete]
+
+    subgraph Phase2[阶段2: 数据传递 / Phase 2: Data Transfer / Phase 2: Datenübertragung]
+
+        B1[EntryPlugin自举<br/>EntryPlugin Self-bootstrap<br/>EntryPlugin Selbststart] --> B2[调用EntryPoint 42<br/>Call EntryPoint 42<br/>EntryPoint 42 aufrufen]
+
+        B2 --> B3[PointerTransfer规则0<br/>→ AddPlugin.Add参数0<br/>PointerTransfer Rule 0<br/>→ AddPlugin.Add Parameter 0<br/>PointerTransfer Regel 0<br/>→ AddPlugin.Add Parameter 0]
+
+        B4[EntryPlugin自举<br/>EntryPlugin Self-bootstrap<br/>EntryPlugin Selbststart] --> B5[调用EntryPoint 58<br/>Call EntryPoint 58<br/>EntryPoint 58 aufrufen]
+
+        B5 --> B6[PointerTransfer规则1<br/>→ AddPlugin.Add参数1<br/>PointerTransfer Rule 1<br/>→ AddPlugin.Add Parameter 1<br/>PointerTransfer Regel 1<br/>→ AddPlugin.Add Parameter 1]
+
+    end
+
     
-    Init --> Auto1[EntryPlugin Auto-call<br/>EntryPoint with 42<br/>Get CallPlugin via Symbol Lookup]
-    Auto1 --> Rule4{Find Config Rule<br/>TransferRule_4}
+
+    subgraph Phase3[阶段3: 计算执行 / Phase 3: Calculation Execution / Phase 3: Berechnungsausführung]
+
+        C1[延迟加载AddPlugin<br/>Lazy Load AddPlugin<br/>AddPlugin verzögert laden] --> C2[AddPlugin接收参数<br/>AddPlugin Receive Parameters<br/>AddPlugin Parameter empfangen]
+
+        C2 --> C3[计算: 42+58=100<br/>Calculate: 42+58=100<br/>Berechnen: 42+58=100]
+
+        C3 --> C4[格式化结果字符串<br/>Format Result String<br/>Ergebniszeichenfolge formatieren]
+
+        C4 --> C5[触发主动调用规则<br/>Trigger Active Call Rule<br/>Aktive Aufrufregel auslösen]
+
+    end
+
     
-    Rule4 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 0| Store1[Store Parameter a = 42]
+
+    subgraph Phase4[阶段4: 结果输出 / Phase 4: Result Output / Phase 4: Ergebnisausgabe]
+
+        D1[PointerTransfer规则1<br/>主动调用规则<br/>PointerTransfer Rule 1<br/>Active Call Rule<br/>PointerTransfer Regel 1<br/>Aktive Aufrufregel] --> D2[自动获取GetResultString<br/>Auto-get GetResultString<br/>GetResultString automatisch abrufen]
+
+        D2 --> D3[加载add_plugin.nxpt<br/>Load add_plugin.nxpt<br/>add_plugin.nxpt laden]
+
+        D3 --> D4[规则0: 设置日志级别=INFO<br/>Rule 0: Set Log Level=INFO<br/>Regel 0: Protokollierungsebene=INFO setzen]
+
+        D4 --> D5[延迟加载FileLoggerPlugin<br/>Lazy Load FileLoggerPlugin<br/>FileLoggerPlugin verzögert laden]
+
+        D5 --> D6[加载file_logger_plugin.nxpt<br/>Load file_logger_plugin.nxpt<br/>file_logger_plugin.nxpt laden]
+
+        D6 --> D7[写入日志文件<br/>Write to Log File<br/>In Protokolldatei schreiben]
+
+    end
+
     
-    Store1 --> Auto2[EntryPlugin Auto-call<br/>EntryPoint with 58<br/>Get CallPlugin via Symbol Lookup]
-    Auto2 --> Rule5{Find Config Rule<br/>TransferRule_5}
+
+    Phase1 --> Phase2
+
+    Phase2 --> Phase3
+
+    Phase3 --> Phase4
+
     
-    Rule5 -->|Source: EntryPlugin.EntryPoint<br/>Target: AddPlugin.Add Parameter 1| Store2[Store Parameter b = 58]
-    
-    Store2 --> Check1{Check if Parameters Complete?}
-    
-    Check1 -->|Yes| CallAdd[Call AddPlugin.Add 42, 58]
-    
-    CallAdd --> Calc[AddPlugin Execute Calculation<br/>42 + 58 = 100]
-    
-    Calc --> Format[Format Result String<br/>GetResultString]
-    
-    Format --> Rule9{Find Active Call Rule<br/>TransferRule_9<br/>SourceParamIndex=-1}
-    
-    Rule9 -->|Source: AddPlugin.Add<br/>Target: FileLoggerPlugin.Write Parameter 1| GetExport[Auto-get Export Interface Value<br/>GetResultString]
-    
-    GetExport --> Rule8{Find Config Rule<br/>TransferRule_8}
-    
-    Rule8 -->|Target: FileLoggerPlugin.Write Parameter 0<br/>Value: 2 INFO| CallLogger[Call FileLoggerPlugin.Write<br/>level=2, format=result_string]
-    
-    CallLogger --> Write[Write to Log File<br/>nxld_parser.log]
-    
-    Write --> End([Process Complete])
-    
-    Check1 -->|No| Wait[Wait for More Parameters]
-    Wait --> Auto2
-    
-    style Start fill:#90EE90
-    style End fill:#FFB6C1
-    style Calc fill:#FFD700
-    style GetExport fill:#87CEEB
-    style Write fill:#DDA0DD
+
+    style Phase1 fill:#E3F2FD
+
+    style Phase2 fill:#FFF3E0
+
+    style Phase3 fill:#E8F5E9
+
+    style Phase4 fill:#F3E5F5
+
 ```
 
-## 关键配置规则说明 / Key Configuration Rules / Wichtige Konfigurationsregeln
+## 配置文件结构 / Configuration File Structure / Konfigurationsdatei-Struktur
 
-### TransferRule_4 & TransferRule_5
+### pointer_transfer_plugin.nxpt
+```ini
+[EntryPlugin]
+PluginName=EntryPlugin
+PluginPath=./plugins/entry_plugin.dll
+NxptPath=./plugins/entry_plugin.nxpt
 ```
-Source: EntryPlugin.EntryPoint[0]
-Target: AddPlugin.Add[0] / AddPlugin.Add[1]
-Mode: broadcast
-```
-**规则说明 / Rule Description / Regelbeschreibung:**
-这两个规则将 EntryPlugin 传递的两个数字分别发送到 AddPlugin 的两个参数位置。
-These two rules send the two numbers passed by EntryPlugin to the two parameter positions of AddPlugin respectively.
-Diese beiden Regeln senden die beiden vom EntryPlugin übergebenen Zahlen jeweils an die beiden Parameterpositionen des AddPlugins.
 
-### TransferRule_7
-```
-Source: AddPlugin.GetResultString[0]
-Target: FileLoggerPlugin.Write[1]
-Condition: not_null
-Mode: unicast
-```
-**规则说明 / Rule Description / Regelbeschreibung:**
-这个规则定义了从 AddPlugin 的导出接口 GetResultString 获取值并传递给日志插件（懒等待模式）。此外，该规则还作为导出接口定义，为 TransferRule_9 提供接口名称。
-This rule defines getting the value from AddPlugin's export interface GetResultString and passing it to the logger plugin (lazy wait mode). Additionally, this rule also serves as an export interface definition, providing the interface name for TransferRule_9.
-Diese Regel definiert, den Wert von AddPlugins Export-Schnittstelle GetResultString abzurufen und an das Logger-Plugin zu übergeben (lazy wait Modus). Zusätzlich dient diese Regel auch als Export-Schnittstellendefinition und stellt den Schnittstellennamen für TransferRule_9 bereit.
+### entry_plugin.nxpt
+包含从 EntryPlugin 到其他插件的传递规则：
+- TransferRule_0: EntryPlugin.EntryPoint[0] → AddPlugin.Add[0]
+- TransferRule_1: EntryPlugin.EntryPoint[0] → AddPlugin.Add[1]
+- TransferRule_2: EntryPlugin.EntryPoint[0] → FileLoggerPlugin.Write[1]
+- TransferRule_3: FileLoggerPlugin.Write[0] = 2 (常量值)
 
-### TransferRule_9
-```
-Source: AddPlugin.Add
-SourceParamIndex: -1 (主动调用 / Active Call / Aktiver Aufruf)
-Target: FileLoggerPlugin.Write[1]
-Mode: unicast
-```
-**规则说明 / Rule Description / Regelbeschreibung:**
-这个规则定义了主动调用机制：当 AddPlugin.Add 被调用后，自动从 GetResultString 导出接口获取值并传递给日志插件。TransferRule_9 通过查找配置规则（如 TransferRule_7）来发现导出接口名称，而不是使用硬编码的接口名称。
-This rule defines the active call mechanism: after AddPlugin.Add is called, automatically get value from GetResultString export interface and pass it to the logger plugin. TransferRule_9 discovers the export interface name by searching configuration rules (such as TransferRule_7), rather than using hardcoded interface names.
-Diese Regel definiert den aktiven Aufrufmechanismus: Nach Aufruf von AddPlugin.Add automatisch Wert von GetResultString Export-Schnittstelle abrufen und an Logger-Plugin übergeben. TransferRule_9 entdeckt den Export-Schnittstellennamen durch Suche in Konfigurationsregeln (wie TransferRule_7), anstatt hartcodierte Schnittstellennamen zu verwenden.
+### add_plugin.nxpt
+包含从 AddPlugin 到其他插件的传递规则：
+- TransferRule_0: AddPlugin.GetResultString[0] → FileLoggerPlugin.Write[1] (条件: not_null)
+- TransferRule_1: AddPlugin.Add (主动调用规则) → FileLoggerPlugin.Write[1]
 
-### TransferRule_8
-```
-Target: FileLoggerPlugin.Write[0]
-TargetParamValue: 2
-Mode: unicast
-```
-**规则说明 / Rule Description / Regelbeschreibung:**
-这个规则设置了日志插件的日志级别为 INFO (2)。
-This rule sets the log level of the logger plugin to INFO (2).
-Diese Regel setzt die Protokollierungsebene des Logger-Plugins auf INFO (2).
+### file_logger_plugin.nxpt
+包含 FileLoggerPlugin 的配置规则：
+- TransferRule_0: FileLoggerPlugin.Write[0] = 2 (常量值)
 
-## 数据流说明 / Data Flow Description / Datenfluss-Beschreibung
+## 链式加载流程 / Chain Loading Flow / Kettenladungsfluss
 
-1. **初始化阶段 / Initialization Phase / Initialisierungsphase**
-   - 引擎加载所有根插件 / Engine loads all root plugins / Engine lädt alle Root-Plugins
-   - PointerTransferPlugin 读取 .nxpt 配置文件 / PointerTransferPlugin reads .nxpt configuration file / PointerTransferPlugin liest .nxpt-Konfigurationsdatei
+1. **启动阶段 / Startup Phase / Startphase**
+   - PointerTransferPlugin 加载自己的 `.nxpt` 文件
+   - 解析入口插件配置，获取入口插件路径和 `.nxpt` 路径
+   - 加载入口插件的 `.nxpt` 文件
 
-2. **数据输入阶段 / Data Input Phase / Dateneingabephase**
-   - EntryPlugin 在加载时（DllMain/构造函数）自动调用自己的接口，通过符号查找机制获取 CallPlugin 函数指针，然后调用 CallPlugin(EntryPlugin, EntryPoint, 0, &42) 和 CallPlugin(EntryPlugin, EntryPoint, 0, &58) 传递两个数字 (42, 58) / EntryPlugin automatically calls its own interface on load (DllMain/constructor), obtains CallPlugin function pointer through symbol lookup mechanism, then calls CallPlugin(EntryPlugin, EntryPoint, 0, &42) and CallPlugin(EntryPlugin, EntryPoint, 0, &58) to pass two numbers (42, 58) / EntryPlugin ruft beim Laden (DllMain/Konstruktor) automatisch seine eigene Schnittstelle auf, erhält CallPlugin-Funktionszeiger über Symbolsuche-Mechanismus, ruft dann CallPlugin(EntryPlugin, EntryPoint, 0, &42) und CallPlugin(EntryPlugin, EntryPoint, 0, &58) auf, um zwei Zahlen (42, 58) zu übergeben
-   - PointerTransferPlugin 根据配置规则将数据转发到 AddPlugin / PointerTransferPlugin forwards data to AddPlugin according to configuration rules / PointerTransferPlugin leitet Daten gemäß Konfigurationsregeln an AddPlugin weiter
+2. **链式加载阶段 / Chain Loading Phase / Kettenladungsphase**
+   - 遍历入口插件 `.nxpt` 中的所有规则
+   - 对于每个规则的目标插件，检查其 `.nxpt` 文件是否已加载
+   - 如果未加载，则根据插件路径构建 `.nxpt` 路径并加载
+   - 递归处理新加载的规则中的目标插件
 
-3. **计算阶段 / Calculation Phase / Berechnungsphase**
-   - AddPlugin 接收两个参数并执行加法计算 / AddPlugin receives two parameters and performs addition calculation / AddPlugin empfängt zwei Parameter und führt Additionsberechnung durch
-   - PointerTransferPlugin 检测到主动调用规则（TransferRule_9），通过查找配置规则（如 TransferRule_7）发现 GetResultString 接口名称，然后自动调用该接口获取结果 / PointerTransferPlugin detects active call rule (TransferRule_9), discovers GetResultString interface name by searching configuration rules (such as TransferRule_7), then automatically calls this interface to get result / PointerTransferPlugin erkennt aktive Aufrufregel (TransferRule_9), entdeckt GetResultString-Schnittstellennamen durch Suche in Konfigurationsregeln (wie TransferRule_7), ruft dann automatisch diese Schnittstelle auf, um Ergebnis zu erhalten
+3. **延迟加载阶段 / Lazy Loading Phase / Lazy-Ladungsphase**
+   - 当需要调用目标插件接口时，检查该插件的 `.nxpt` 文件是否已加载
+   - 如果未加载，则先加载其 `.nxpt` 文件
+   - 然后加载插件本身并调用接口
 
-4. **结果输出阶段 / Result Output Phase / Ergebnisausgabephase**
-   - PointerTransferPlugin 根据主动调用规则（TransferRule_9）通过查找配置规则发现导出接口名称，自动获取 GetResultString 的值 / PointerTransferPlugin automatically gets GetResultString value according to active call rule (TransferRule_9) by discovering export interface name through searching configuration rules / PointerTransferPlugin erhält GetResultString-Wert automatisch gemäß aktiver Aufrufregel (TransferRule_9) durch Entdecken des Export-Schnittstellennamens über Suche in Konfigurationsregeln
-   - 根据配置规则（TransferRule_8）设置日志级别，将结果传递给 FileLoggerPlugin / Sets log level according to configuration rules (TransferRule_8), passes result to FileLoggerPlugin / Setzt Protokollierungsebene gemäß Konfigurationsregeln (TransferRule_8), übergibt Ergebnis an FileLoggerPlugin
-   - FileLoggerPlugin 将计算结果写入日志文件 / FileLoggerPlugin writes calculation results to log file / FileLoggerPlugin schreibt Berechnungsergebnisse in Protokolldatei
+## 优势 / Advantages / Vorteile
 
-## 插件解耦说明 / Plugin Decoupling Description / Plugin-Entkopplungs-Beschreibung
+1. **模块化 / Modularity / Modularität**
+   - 每个插件管理自己的配置规则，便于维护 / Each plugin manages its own configuration rules, easy to maintain / Jedes Plugin verwaltet seine eigenen Konfigurationsregeln, einfach zu warten
 
-- **EntryPlugin**: 只负责传递参数，不关心数据后续流向。通过符号查找机制动态获取 CallPlugin 函数指针，实现了与 PointerTransferPlugin 的解耦 / Only responsible for passing parameters, doesn't care about data flow direction. Dynamically obtains CallPlugin function pointer through symbol lookup mechanism, achieving decoupling from PointerTransferPlugin / Nur für die Parameterübergabe verantwortlich, kümmert sich nicht um die Datenflussrichtung. Erhält CallPlugin-Funktionszeiger dynamisch über Symbolsuche-Mechanismus und erreicht Entkopplung von PointerTransferPlugin
-- **AddPlugin**: 只负责计算，不关心结果如何传递 / Only responsible for calculation, doesn't care about how results are transferred / Nur für die Berechnung verantwortlich, kümmert sich nicht um Ergebnisübertragung
-- **PointerTransferPlugin**: 只负责根据配置规则路由数据，通过主动调用规则自动获取导出接口的值 / Only responsible for routing data according to configuration rules, automatically gets export interface values through active call rules / Nur für das Routing von Daten gemäß Konfigurationsregeln verantwortlich, ruft Export-Schnittstellenwerte automatisch über aktive Aufrufregeln ab
-- **FileLoggerPlugin**: 只负责接收日志信息并写入文件 / Only responsible for receiving log information and writing to file / Nur für den Empfang von Protokollinformationen und das Schreiben in Dateien verantwortlich
+2. **可扩展性 / Scalability / Skalierbarkeit**
+   - 添加新插件只需创建对应的 `.nxpt` 文件 / Adding new plugins only requires creating corresponding `.nxpt` file / Hinzufügen neuer Plugins erfordert nur das Erstellen der entsprechenden `.nxpt`-Datei
+
+3. **性能优化 / Performance Optimization / Leistungsoptimierung**
+   - 延迟加载机制减少启动时间 / Lazy loading mechanism reduces startup time / Lazy-Ladungsmechanismus reduziert Startzeit
+   - 只加载实际使用的插件 / Only load actually used plugins / Nur tatsächlich verwendete Plugins laden
+
+4. **解耦设计 / Decoupling Design / Entkopplungsdesign**
+   - 插件之间通过配置文件解耦 / Plugins are decoupled through configuration files / Plugins sind über Konfigurationsdateien entkoppelt
+   - 修改一个插件的配置不影响其他插件 / Modifying one plugin's configuration doesn't affect other plugins / Änderung der Konfiguration eines Plugins beeinflusst andere Plugins nicht
+
