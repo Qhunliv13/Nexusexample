@@ -5,6 +5,7 @@
 [Plugin]
 Name=PointerTransferPlugin
 Version=2.0.0
+<<<<<<< HEAD
 UID=SfHkv2vA8M7wPnq88WoSEYpRmPxEqRHbQ7lmHayKNyGoZa14IybHlOj3XGNqCYiv
 Path=.\plugins/pointer_transfer_plugin.dll
 

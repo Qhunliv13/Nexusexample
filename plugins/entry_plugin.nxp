@@ -5,6 +5,7 @@
 [Plugin]
 Name=EntryPlugin
 Version=1.0.0
+<<<<<<< HEAD
 UID=qo0bw1oPFQpJF7sYp0udCzIZLJQxffvcdmWLBACpjOJUP9klx7Qem9a0mRXPyLHf
 Path=.\plugins/entry_plugin.dll
 
