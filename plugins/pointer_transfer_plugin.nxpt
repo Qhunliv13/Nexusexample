@@ -1,0 +1,8 @@
+# NXLD Pointer Transfer Configuration File / NXLD指针传递配置文件 / NXLD-Zeigerübertragungs-Konfigurationsdatei
+# Format: NXPT v1.0 / 格式: NXPT v1.0
+# This file defines entry plugin location for chain loading / 此文件定义入口插件位置用于链式加载 / Diese Datei definiert Einstiegs-Plugin-Position für Kettenladung
+
+[EntryPlugin]
+PluginName=EntryPlugin
+PluginPath=./plugins/entry_plugin.dll
+NxptPath=./plugins/entry_plugin.nxpt
